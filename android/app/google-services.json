@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "736575312373",
+    "firebase_url": "https://trendingrepo.firebaseio.com",
+    "project_id": "trendingrepo",
+    "storage_bucket": "trendingrepo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:736575312373:android:c49ae10ea7dec6f883d0bc",
+        "android_client_info": {
+          "package_name": "com.digitegrity.gittrend"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "736575312373-2ntk9k9kulqvg7b74dv0bq5mpgibtbat.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgpoyciPJYXGFH8L7HnDISUojjd7uaKdk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "736575312373-2ntk9k9kulqvg7b74dv0bq5mpgibtbat.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
