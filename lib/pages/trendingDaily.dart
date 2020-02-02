@@ -156,7 +156,9 @@ class _TrendingDailyState extends State<TrendingDaily> {
                           margin: EdgeInsets.only(left: 188),
                           child: ButtonTheme(
                             child: RaisedButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                print("Abhishek");
+                              },
                               textColor: Colors.white,
                               color: Colors.teal,
                               shape: new RoundedRectangleBorder(
