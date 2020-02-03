@@ -105,16 +105,9 @@ class _TrendingDailyState extends State<TrendingDaily> {
                           width: 20,
                           margin: const EdgeInsets.only(
                               top: 10, bottom: 10, right: 10),
-                          child: ButtonTheme(
-                            child: RaisedButton(
-                              onPressed: () {},
+                          decoration: BoxDecoration(
                               color: hexToColor(data[index]["languageColor"]),
-                              shape: new RoundedRectangleBorder(
-                                  borderRadius:
-                                      new BorderRadius.circular(10.0)),
-                              padding: const EdgeInsets.all(0.0),
-                            ),
-                          ),
+                              shape: BoxShape.circle),
                         ),
                         Text("${data[index]["language"]}"),
                         Container(
@@ -140,36 +133,27 @@ class _TrendingDailyState extends State<TrendingDaily> {
                     margin: EdgeInsets.only(
                         top: 10, bottom: 10, left: 15, right: 15),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        Text("Built By :",
-                            style: TextStyle(fontWeight: FontWeight.normal)),
-                        //     Container(child: ListView.builder(
-                        //   shrinkWrap: true,
-                        //   itemCount:  builtBy.length,
-                        //   itemBuilder: (BuildContext context, int index) {
-                        //     print(builtBy[index]["username"]);
-                        //     return Text("");
-                        //   },
-                        // ),),
-
+                        Text(
+                          "Built By :",
+                          style: TextStyle(fontWeight: FontWeight.normal),
+                        ),
+//                        Container(
+//                          child: ListView.builder(
+//                            shrinkWrap: true,
+//                            itemCount: builtBy.length,
+//                            itemBuilder: (BuildContext context, int index) {
+//                              print(builtBy[index]["username"]);
+//                              return Text("");
+//                            },
+//                          ),
+//                        ),
                         Container(
                           margin: EdgeInsets.only(left: 188),
-                          child: ButtonTheme(
-                            child: RaisedButton(
-                              onPressed: () {},
-                              textColor: Colors.white,
-                              color: Colors.teal,
-                              shape: new RoundedRectangleBorder(
-                                  borderRadius: new BorderRadius.circular(5.0)),
-                              padding: const EdgeInsets.all(0.0),
-                              child: Container(
-                                padding: const EdgeInsets.all(10.0),
-                                child: const Text('Bookmark',
-                                    style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.normal)),
-                              ),
-                            ),
+                          child: IconButton(
+                            onPressed: () {},
+                            icon: Icon(Icons.bookmark_border),
                           ),
                         ),
                       ],

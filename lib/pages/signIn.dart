@@ -7,15 +7,6 @@ import 'package:gittrend/pages/signUp.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 
 class SignInPage extends StatefulWidget {
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   @override
   _SignInPageState createState() => _SignInPageState();
 }
@@ -29,15 +20,15 @@ class _SignInPageState extends State<SignInPage> {
   String _email;
   String _password;
 
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
   Future signIn(String email, String password) async {
     if (email == null || password == null) {
       _showSnackBar(context, "Something went wrong !", Colors.red);
     } else {
       try {
-        showDialogue(context);
-        FirebaseUser user = (await _firebaseAuth.signInWithEmailAndPassword(
+        showDialogue(context, 'Authenticating...');
+        FirebaseUser user = (await firebaseAuth.signInWithEmailAndPassword(
                 email: email, password: password))
             .user;
         if (user != null) {
@@ -64,10 +55,10 @@ class _SignInPageState extends State<SignInPage> {
 
   ProgressDialog dialogue;
 
-  void showDialogue(context) {
+  void showDialogue(context, text) {
     dialogue = new ProgressDialog(context,
         type: ProgressDialogType.Normal, isDismissible: false);
-    dialogue.style(message: "Authenticating...");
+    dialogue.style(message: text);
     dialogue.show();
   }
 
@@ -77,14 +68,32 @@ class _SignInPageState extends State<SignInPage> {
     passwordVisible = false;
   }
 
+  Future<void> resetPassword(String email) async {
+    try {
+      await firebaseAuth.sendPasswordResetEmail(email: email);
+      dialogue.hide();
+      _showSnackBar(
+          context,
+          "A reset link has been sent to you. Check out your email !",
+          Colors.black);
+    } on PlatformException catch (e) {
+      if (e.code == "ERROR_USER_NOT_FOUND") {
+        dialogue.hide();
+        _showSnackBar(context, 'Email not registered.', Colors.red);
+      } else {
+        dialogue.hide();
+        _showSnackBar(context, 'Something went wrong. Report on Google Play.',
+            Colors.red);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+    var screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       key: globalKey,
       resizeToAvoidBottomPadding: false,
@@ -92,21 +101,22 @@ class _SignInPageState extends State<SignInPage> {
         onWillPop: () {
           return SystemNavigator.pop();
         },
-        child: Center(
-          // Center is a layout widget. It takes a single child and positions it
-          // in the middle of the parent.
-          child: Column(children: <Widget>[
-            Container(
-              margin: const EdgeInsets.only(
-                  bottom: 10.0, top: 10, left: 20, right: 20),
-              alignment: Alignment.topCenter,
-              padding: const EdgeInsets.all(0),
-              child: Image.asset('assets/gitlogo.png'),
-              height: 300,
-              width: 300,
-            ),
-            Container(
-                margin: const EdgeInsets.only(top: 50, left: 40, right: 40),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            FocusScope.of(context).requestFocus(new FocusNode());
+          },
+          child: SafeArea(
+            child: Column(children: <Widget>[
+//              Spacer(
+//                flex: 1,
+//              ),
+              Container(
+                child: Image.asset('assets/gitlogo.png'),
+                width: screenWidth * 0.75,
+              ),
+              Container(
+                padding: EdgeInsets.only(left: 40, right: 40),
                 child: TextField(
                   keyboardType: TextInputType.emailAddress,
                   style: TextStyle(color: Colors.black),
@@ -115,7 +125,7 @@ class _SignInPageState extends State<SignInPage> {
                       onPressed: () {},
                       icon: Icon(Icons.person),
                     ),
-                    labelText: "Username",
+                    labelText: "Email",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(
                         Radius.circular(10.0),
@@ -127,86 +137,107 @@ class _SignInPageState extends State<SignInPage> {
                       _email = value;
                     });
                   },
-                )),
-            Container(
-              margin: const EdgeInsets.only(top: 50, left: 40, right: 40),
-              child: TextField(
-                obscureText: !passwordVisible,
-                decoration: InputDecoration(
-                  labelText: "Password",
-                  prefixIcon: IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.vpn_key),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      passwordVisible ? Icons.visibility : Icons.visibility_off,
-                      color: Colors.grey,
+                ),
+              ),
+              SizedBox(
+                height: 50,
+              ),
+              Container(
+                margin: const EdgeInsets.only(left: 40, right: 40),
+                child: TextField(
+                  obscureText: !passwordVisible,
+                  decoration: InputDecoration(
+                    labelText: "Password",
+                    prefixIcon: IconButton(
+                      onPressed: () {},
+                      icon: Icon(Icons.vpn_key),
                     ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        passwordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          passwordVisible = !passwordVisible;
+                        });
+                      },
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(10.0),
+                      ),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _password = value;
+                    });
+                  },
+                ),
+              ),
+              SizedBox(
+                height: 70,
+              ),
+              Container(
+                child: ButtonTheme(
+                  minWidth: 350,
+                  child: RaisedButton(
                     onPressed: () {
-                      setState(() {
-                        passwordVisible = !passwordVisible;
-                      });
+                      signIn(_email, _password);
                     },
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(10.0),
+                    textColor: Colors.white,
+                    color: Colors.black,
+                    shape: new RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(50.0),
+                    ),
+                    child: Container(
+                      padding: EdgeInsets.all(10.0),
+                      child: Text('SIGN IN', style: TextStyle(fontSize: 20)),
                     ),
                   ),
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    _password = value;
-                  });
-                },
               ),
-            ),
-            Container(
-              margin: const EdgeInsets.only(top: 70.0, bottom: 10.0),
-              child: ButtonTheme(
-                minWidth: 350,
-                child: RaisedButton(
-                  onPressed: () {
-                    signIn(_email, _password);
-                  },
-                  textColor: Colors.white,
-                  color: Colors.black,
-                  shape: new RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(50.0)),
-                  padding: const EdgeInsets.all(0.0),
-                  child: Container(
-                    padding: const EdgeInsets.all(10.0),
-                    child:
-                        const Text('SIGN IN', style: TextStyle(fontSize: 20)),
-                  ),
-                ),
+              SizedBox(
+                height: 20,
               ),
-            ),
-            Container(
-              margin: EdgeInsets.only(top: 45, bottom: 100),
-            ),
-            Divider(
-              thickness: 1,
-            ),
-            Container(
-              margin: EdgeInsets.all(10),
-              alignment: Alignment.bottomCenter,
-              child: InkWell(
-                  onTap: () {
-                    var route = new MaterialPageRoute(
-                      builder: (BuildContext context) => new SignUp(),
-                    );
-                    Navigator.of(context).push(route);
-                  },
-                  child: Text("NEW USER ?  SIGN UP",
-                      style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.grey,
-                          fontWeight: FontWeight.w600,
-                          decoration: TextDecoration.none))),
-            ),
-          ]),
+              Container(
+                child: InkWell(
+                    onTap: () {
+                      _showDialog();
+                    },
+                    child: Text("Forgot Password ?",
+                        style: TextStyle(
+                            fontSize: 15,
+                            color: Colors.grey,
+                            decoration: TextDecoration.none))),
+              ),
+              Spacer(
+                flex: 5,
+              ),
+              Divider(
+                thickness: 1,
+              ),
+              Container(
+                margin: EdgeInsets.all(10),
+                child: InkWell(
+                    onTap: () {
+                      var route = new MaterialPageRoute(
+                        builder: (BuildContext context) => new SignUp(),
+                      );
+                      Navigator.of(context).push(route);
+                    },
+                    child: Text("NEW USER ?  SIGN UP",
+                        style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.none))),
+              ),
+            ]),
+          ),
         ),
       ),
     );
@@ -218,5 +249,82 @@ class _SignInPageState extends State<SignInPage> {
       backgroundColor: color,
     );
     globalKey.currentState.showSnackBar(snackBar);
+  }
+
+  void _showDialog() {
+    // flutter defined function
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+          child: Container(
+            height: 320,
+            width: 300,
+            child: Column(
+              children: <Widget>[
+                Container(
+                  height: 50,
+                  width: 50,
+                  margin: const EdgeInsets.only(
+                      top: 30, bottom: 10, right: 10, left: 10),
+                  child: Icon(Icons.vpn_key),
+                ),
+                Text("Enter your registered email \nto get reset link",
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontFamily: 'Whitney',
+                        fontSize: 20)),
+                Container(
+                    margin: const EdgeInsets.all(20),
+                    child: TextField(
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: new InputDecoration(
+                          hintText: 'Email',
+                          hintStyle: TextStyle(
+                              color: Colors.grey, fontFamily: 'Whitney'),
+                          border: new OutlineInputBorder(
+                            borderRadius: const BorderRadius.all(
+                              const Radius.circular(10.0),
+                            ),
+                          ),
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            _email = value;
+                          });
+                        })),
+                Container(
+                  margin: EdgeInsets.only(top: 10.0, bottom: 10.0),
+                  child: ButtonTheme(
+                    minWidth: 200,
+                    child: RaisedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        showDialogue(context, 'Sending...');
+                        resetPassword(_email);
+                      },
+                      textColor: Colors.white,
+                      color: Colors.black,
+                      shape: new RoundedRectangleBorder(
+                        borderRadius: new BorderRadius.circular(10.0),
+                      ),
+                      child: Container(
+                        padding: EdgeInsets.all(10.0),
+                        child: Text('Send',
+                            style:
+                                TextStyle(fontSize: 15, color: Colors.white)),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }
